@@ -4,12 +4,38 @@ import { db } from "@/lib/db"
 import { calculateElo } from "@/lib/elo"
 import bcrypt from "bcryptjs"
 import { revalidatePath } from "next/cache"
+import { GameType } from "@prisma/client"
+
+// 👇 THIS IS THE MISSING HELPER FUNCTION
+async function fetchRating(userId: string, game: GameType) {
+  let rating = await db.rating.findUnique({
+    where: {
+      userId_game: {
+        userId,
+        game
+      }
+    }
+  })
+
+  // If they have never played this game before, create a default 1000 Elo rating
+  if (!rating) {
+    rating = await db.rating.create({
+      data: {
+        userId,
+        game,
+        elo: 1000
+      }
+    })
+  }
+
+  return rating
+}
 
 export async function submitMatch(formData: FormData) {
   const winnerId = formData.get("winnerId") as string
   const loserId = formData.get("loserId") as string
-  const game = formData.get("game") as "DARTS" | "CHESS"
-  const pin = formData.get("pin") as string // "1234"
+  const game = formData.get("game") as GameType
+  const pin = formData.get("pin") as string 
 
   // 1. Security: Verify Loser's PIN
   const loserUser = await db.user.findUnique({ where: { id: loserId } })
@@ -18,8 +44,7 @@ export async function submitMatch(formData: FormData) {
   const isPinValid = await bcrypt.compare(pin, loserUser.pin)
   if (!isPinValid) throw new Error("Invalid PIN")
 
-  // 2. Get Current Ratings
-  // (Helper function fetchRating would get or create default rating)
+  // 2. Get Current Ratings (Now using the helper function above)
   const winnerRating = await fetchRating(winnerId, game)
   const loserRating = await fetchRating(loserId, game)
 
@@ -62,8 +87,6 @@ export async function submitMatch(formData: FormData) {
         currentStreak: 0 // Streak reset!
       }
     })
-    
-    // TODO: Insert Achievement Check Logic here
   })
 
   // 5. Refresh Dashboards
