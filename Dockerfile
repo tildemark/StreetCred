@@ -5,6 +5,7 @@ FROM node:18-alpine AS base
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 RUN npm install
 
 # 2. Rebuild the source code only when needed
