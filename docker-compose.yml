@@ -1,0 +1,59 @@
+version: '3.8'
+
+networks:
+  net:
+    external: true
+  internal_backend:
+    driver: bridge
+
+services:
+  # --- Next.js App ---
+  streetcred-app:
+    # If building via Portainer from Git:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: streetcred_app
+    restart: unless-stopped
+    environment:
+      # ⚠️ Notice the ${VARIABLE} syntax
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@streetcred_db:5432/${DB_NAME}
+      - REDIS_URL=redis://streetcred_redis:6379
+      - AUTH_SECRET=${AUTH_SECRET} 
+      - AUTH_URL=${AUTH_URL}
+      # Cloudinary (for images)
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    networks:
+      - net
+      - internal_backend
+
+  # --- Database ---
+  streetcred-db:
+    image: postgres:15-alpine
+    container_name: streetcred_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal_backend
+
+  # --- Redis ---
+  streetcred-redis:
+    image: redis:alpine
+    container_name: streetcred_redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal_backend
+
+volumes:
+  db_data:
+  redis_data:
