@@ -16,20 +16,20 @@ model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
-  image     String?  // Cloudinary URL
-  pin       String?  // Hashed PIN for "No Phone" verification
-  
-  // The "Digital Handshake"
+  image     String?
+  pin       String?
   qrCode    String   @unique @default(uuid())
-  
+  createdAt DateTime @default(now())
+
+  // Relations
   ratings   Rating[]
-  wonMatches Match[] @relation("Winner")
-  lostMatches Match[] @relation("loser")
-  history   Match[]  @relation("PlayerHistory")
+  
+  wonMatches  Match[] @relation("Winner")
+  lostMatches Match[] @relation("Loser") 
+  
+  history     Match[] @relation("PlayerHistory")
   
   achievements UserAchievement[]
-  
-  createdAt DateTime @default(now())
 }
 
 model Rating {
@@ -40,13 +40,11 @@ model Rating {
   game        GameType
   elo         Int      @default(1000)
   
-  // Stats
   gamesPlayed Int      @default(0)
   wins        Int      @default(0)
   losses      Int      @default(0)
   draws       Int      @default(0)
   
-  // Streaks
   currentStreak Int    @default(0) 
   maxStreak     Int    @default(0) 
 
@@ -59,10 +57,10 @@ model Match {
   game      GameType 
   
   winnerId  String
-  winner    User     @relation("Winner", fields: [winnerId], references: [id]) 
+  winner    User     @relation("Winner", fields: [winnerId], references: [id])
   
   loserId   String
-  loser     User     @relation("Loser", fields: [loserId], references: [id])   
+  loser     User     @relation("Loser", fields: [loserId], references: [id])
 
   players   User[]   @relation("PlayerHistory")
   
@@ -71,10 +69,10 @@ model Match {
 
 model Achievement {
   id          String    @id @default(uuid())
-  code        String    @unique // e.g., "STREAK_3"
+  code        String    @unique 
   name        String    
   description String    
-  icon        String    // Emoji or Icon name
+  icon        String    
   game        GameType? 
   
   users       UserAchievement[]
