@@ -23,6 +23,8 @@ model User {
   qrCode    String   @unique @default(uuid())
   
   ratings   Rating[]
+  wonMatches Match[] @relation("Winner")
+  lostMatches Match[] @relation("loser")
   history   Match[]  @relation("PlayerHistory")
   
   achievements UserAchievement[]
