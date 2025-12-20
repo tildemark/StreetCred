@@ -3,6 +3,7 @@ FROM node:18-alpine AS base
 
 # 1. Install dependencies only when needed
 FROM base AS deps
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
