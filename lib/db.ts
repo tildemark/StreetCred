@@ -1,7 +1,16 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+const prismaClientSingleton = () => {
+  return new PrismaClient();
+};
 
-export const db = globalForPrisma.prisma || new PrismaClient()
+declare global {
+  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
+// Check if an instance already exists, otherwise create one
+export const db = globalThis.prismaGlobal ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== "production") {
+  globalThis.prismaGlobal = db;
+}
