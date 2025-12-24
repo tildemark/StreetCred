@@ -3,7 +3,7 @@ const nextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost:3001', 'reimagined-palm-tree-5g4x9r7wwpc47j-3001.app.github.dev']
+      allowedOrigins: ['localhost:3000', 'localhost:3001', 'https://reimagined-palm-tree-5g4x9r7wwpc47j.app.github.dev']
     }
   },
   images: {

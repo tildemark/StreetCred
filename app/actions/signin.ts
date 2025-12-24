@@ -1,7 +1,7 @@
 'use server'
 
-import { redirect } from "next/navigation"
+import { signIn } from "@/auth"
 
 export async function signInAction() {
-  redirect("/api/auth/signin/google")
+  await signIn("google")
 }

@@ -11,6 +11,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
+  pages: {
+    error: '/auth/error',
+  },
   callbacks: {
     // We need the User ID to save matches, so we add it to the session
     session({ session, user }) {
