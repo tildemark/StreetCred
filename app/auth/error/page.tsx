@@ -3,9 +3,10 @@ import { auth } from "@/auth"
 export default async function ErrorPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const error = searchParams.error as string
+  const params = await searchParams
+  const error = params.error as string
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
